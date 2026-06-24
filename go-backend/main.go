@@ -1,0 +1,66 @@
+package main
+
+import (
+    "fmt"
+    "log"
+    "net/http"
+
+    "vue-go-backend/config"
+    "vue-go-backend/handlers"
+
+    "github.com/gorilla/mux"
+    "github.com/rs/cors"
+)
+
+func main() {
+    // Initialize database connection
+    config.ConnectDB()
+    defer config.DB.Close()
+    
+    // Create router
+    r := mux.NewRouter()
+    
+    // Initialize handlers
+    userHandler := handlers.NewUserHandler()
+    listingHandler := handlers.NewListingHandler()
+    categoryHandler := handlers.NewCategoryHandler()
+    
+    // API Routes
+    api := r.PathPrefix("/api").Subrouter()
+    
+    // User routes
+    api.HandleFunc("/users", userHandler.GetUsers).Methods("GET")
+    api.HandleFunc("/users/{id}", userHandler.GetUser).Methods("GET")
+    api.HandleFunc("/users", userHandler.CreateUser).Methods("POST")
+    
+    // Listing routes
+    api.HandleFunc("/listings", listingHandler.GetListings).Methods("GET")
+    api.HandleFunc("/listings/{id}", listingHandler.GetListing).Methods("GET")
+    api.HandleFunc("/listings", listingHandler.CreateListing).Methods("POST")
+    
+    // Category routes
+    api.HandleFunc("/categories", categoryHandler.GetCategories).Methods("GET")
+    
+    // Health check
+    api.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+        w.Header().Set("Content-Type", "application/json")
+        w.Write([]byte(`{"status":"ok","message":"Bikeshop API is running"}`))
+    }).Methods("GET")
+    
+    // CORS configuration - More permissive for development
+    c := cors.New(cors.Options{
+        AllowedOrigins:   []string{"*"},
+        AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
+        AllowedHeaders:   []string{"*"},
+        AllowCredentials: false,
+        Debug:            true, // This will log CORS decisions
+    })
+    
+    handler := c.Handler(r)
+    
+    // Start server
+    port := ":3000"
+    fmt.Printf("🚀 Bikeshop API server running on http://localhost%s\n", port)
+    
+    log.Fatal(http.ListenAndServe(port, handler))
+}
