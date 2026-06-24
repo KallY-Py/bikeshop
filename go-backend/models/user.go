@@ -3,43 +3,39 @@ package models
 import "time"
 
 type User struct {
-    ID           int64     `json:"id"`
-    FirstName    string    `json:"first_name"`
-    LastName     string    `json:"last_name"`
-    Username     string    `json:"username"`
-    Email        string    `json:"email"`
-    PasswordHash string    `json:"-"` // "-" means this won't be included in JSON
-    PhoneNumber  *string   `json:"phone_number,omitempty"`
-    ProfileImage *string   `json:"profile_image,omitempty"`
-    Role         string    `json:"role"`
-    Status       string    `json:"status"`
-    CreatedAt    time.Time `json:"created_at"`
-    UpdatedAt    time.Time `json:"updated_at"`
+	ID           int       `json:"id"`
+	FirstName    string    `json:"first_name"`
+	LastName     string    `json:"last_name"`
+	Username     string    `json:"username"`
+	Email        string    `json:"email"`
+	PhoneNumber  *string   `json:"phone_number,omitempty"`
+	ProfileImage *string   `json:"profile_image,omitempty"`
+	PasswordHash string    `json:"-"`
+	Role         string    `json:"role"`
+	Status       string    `json:"status"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
-// For registration (without exposing password hash)
 type UserRegister struct {
-    FirstName   string `json:"first_name"`
-    LastName    string `json:"last_name"`
-    Username    string `json:"username"`
-    Email       string `json:"email"`
-    Password    string `json:"password"`
-    PhoneNumber string `json:"phone_number,omitempty"`
+	FirstName   string `json:"first_name"`
+	LastName    string `json:"last_name"`
+	Username    string `json:"username"`
+	Email       string `json:"email"`
+	PhoneNumber string `json:"phone_number"`
+	Password    string `json:"password"`
 }
 
-// For login
+type UserUpdate struct {
+	FirstName   string `json:"first_name"`
+	LastName    string `json:"last_name"`
+	Username    string `json:"username"`
+	Email       string `json:"email"`
+	PhoneNumber string `json:"phone_number"`
+	Password    string `json:"password"`
+}
+
 type UserLogin struct {
-    Email    string `json:"email"`
-    Password string `json:"password"`
-}
-
-// For public profile (no sensitive data)
-type UserProfile struct {
-    ID           int64     `json:"id"`
-    FirstName    string    `json:"first_name"`
-    LastName     string    `json:"last_name"`
-    Username     string    `json:"username"`
-    PhoneNumber  *string   `json:"phone_number,omitempty"`
-    ProfileImage *string   `json:"profile_image,omitempty"`
-    CreatedAt    time.Time `json:"created_at"`
+	Identifier string `json:"identifier"` // email or username
+	Password   string `json:"password"`
 }
