@@ -12,13 +12,23 @@
         <!-- Title -->
         <div>
           <label class="block font-label-md text-label-md text-on-surface mb-2">Title *</label>
-          <input v-model="form.title" type="text" required placeholder="e.g., Trek Madone SLR 9 2024" class="w-full bg-surface border border-outline-variant rounded-lg py-2.5 px-4 text-on-surface focus:border-primary" />
+          <input 
+            v-model="form.title" 
+            type="text" 
+            required 
+            placeholder="e.g., Trek Madone SLR 9 2024" 
+            class="w-full bg-surface border border-outline-variant rounded-lg py-2.5 px-4 text-on-surface focus:border-primary focus:outline-none transition-colors" 
+          />
         </div>
         
         <!-- Category -->
         <div>
           <label class="block font-label-md text-label-md text-on-surface mb-2">Category *</label>
-          <select v-model="form.category_id" required class="w-full bg-surface border border-outline-variant rounded-lg py-2.5 px-4 text-on-surface focus:border-primary">
+          <select 
+            v-model="form.category_id" 
+            required 
+            class="w-full bg-surface border border-outline-variant rounded-lg py-2.5 px-4 text-on-surface focus:border-primary focus:outline-none transition-colors"
+          >
             <option value="">Select category</option>
             <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }} ({{ cat.type }})</option>
           </select>
@@ -26,14 +36,26 @@
         
         <!-- Price -->
         <div>
-          <label class="block font-label-md text-label-md text-on-surface mb-2">Price ($) *</label>
-          <input v-model.number="form.price" type="number" required min="0" step="0.01" placeholder="0.00" class="w-full bg-surface border border-outline-variant rounded-lg py-2.5 px-4 text-on-surface focus:border-primary" />
+          <label class="block font-label-md text-label-md text-on-surface mb-2">Price (PHP) *</label>
+          <input 
+            v-model.number="form.price" 
+            type="number" 
+            required 
+            min="0" 
+            step="0.01" 
+            placeholder="0.00" 
+            class="w-full bg-surface border border-outline-variant rounded-lg py-2.5 px-4 text-on-surface focus:border-primary focus:outline-none transition-colors" 
+          />
         </div>
         
         <!-- Condition -->
         <div>
           <label class="block font-label-md text-label-md text-on-surface mb-2">Condition *</label>
-          <select v-model="form.condition_type" required class="w-full bg-surface border border-outline-variant rounded-lg py-2.5 px-4 text-on-surface focus:border-primary">
+          <select 
+            v-model="form.condition_type" 
+            required 
+            class="w-full bg-surface border border-outline-variant rounded-lg py-2.5 px-4 text-on-surface focus:border-primary focus:outline-none transition-colors"
+          >
             <option value="used">Used</option>
             <option value="brand_new">Brand New</option>
             <option value="refurbished">Refurbished</option>
@@ -43,10 +65,15 @@
         <!-- Location -->
         <div>
           <label class="block font-label-md text-label-md text-on-surface mb-2">Location</label>
-          <input v-model="form.location" type="text" placeholder="City, State" class="w-full bg-surface border border-outline-variant rounded-lg py-2.5 px-4 text-on-surface focus:border-primary" />
+          <input 
+            v-model="form.location" 
+            type="text" 
+            placeholder="City, State" 
+            class="w-full bg-surface border border-outline-variant rounded-lg py-2.5 px-4 text-on-surface focus:border-primary focus:outline-none transition-colors" 
+          />
         </div>
         
-        <!-- Image Upload (File Only) -->
+        <!-- Image Upload -->
         <div>
           <label class="block font-label-md text-label-md text-on-surface mb-2">
             Listing Image <span class="text-on-surface-variant text-xs">(JPEG or PNG only, max 5MB)</span>
@@ -70,7 +97,7 @@
             />
             
             <!-- No file selected -->
-            <div v-if="!imagePreview">
+            <div v-if="!imagePreview && !form.image_url">
               <span class="material-symbols-outlined text-4xl text-on-surface-variant mb-2">cloud_upload</span>
               <p class="text-on-surface-variant font-label-md mb-1">Click to upload or drag and drop</p>
               <p class="text-on-surface-variant text-xs">JPEG or PNG only • Max 5MB</p>
@@ -78,7 +105,7 @@
             
             <!-- Preview -->
             <div v-else class="relative">
-              <img :src="imagePreview" class="max-h-48 mx-auto rounded-lg object-cover" />
+              <img :src="imagePreview || form.image_url" class="max-h-48 mx-auto rounded-lg object-cover" />
               <button 
                 type="button"
                 @click.stop="removeImage"
@@ -86,7 +113,8 @@
               >
                 <span class="material-symbols-outlined text-lg">close</span>
               </button>
-              <p class="text-on-surface-variant text-xs mt-2">{{ selectedFile?.name }}</p>
+              <p v-if="selectedFile" class="text-on-surface-variant text-xs mt-2">{{ selectedFile.name }}</p>
+              <p v-else-if="form.image_url" class="text-on-surface-variant text-xs mt-2">Current image</p>
             </div>
           </div>
           
@@ -95,17 +123,33 @@
             <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
             Uploading image...
           </div>
+          
+          <!-- Upload error -->
+          <div v-if="uploadError" class="mt-2 text-sm text-error">
+            {{ uploadError }}
+          </div>
         </div>
         
         <!-- Description -->
         <div>
           <label class="block font-label-md text-label-md text-on-surface mb-2">Description</label>
-          <textarea v-model="form.description" rows="4" placeholder="Describe your bike, its condition, and any upgrades..." class="w-full bg-surface border border-outline-variant rounded-lg py-2.5 px-4 text-on-surface focus:border-primary resize-none"></textarea>
+          <textarea 
+            v-model="form.description" 
+            rows="4" 
+            placeholder="Describe your bike, its condition, and any upgrades..." 
+            class="w-full bg-surface border border-outline-variant rounded-lg py-2.5 px-4 text-on-surface focus:border-primary focus:outline-none transition-colors resize-none"
+          ></textarea>
         </div>
         
         <!-- Buttons -->
-        <div class="flex gap-3 justify-end pt-4">
-          <button type="button" @click="$emit('close')" class="px-6 py-2.5 rounded-lg bg-surface-variant text-on-surface hover:bg-surface-bright transition-colors">Cancel</button>
+        <div class="flex gap-3 justify-end pt-4 border-t border-outline-variant">
+          <button 
+            type="button" 
+            @click="$emit('close')" 
+            class="px-6 py-2.5 rounded-lg bg-surface-variant text-on-surface hover:bg-surface-bright transition-colors"
+          >
+            Cancel
+          </button>
           <button 
             type="submit" 
             :disabled="saving || uploading" 
@@ -121,6 +165,8 @@
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
   name: 'ListingModal',
   props: {
@@ -134,6 +180,7 @@ export default {
       selectedFile: null,
       imagePreview: null,
       uploading: false,
+      uploadError: null,
       dragOver: false,
       form: {
         title: '',
@@ -146,20 +193,24 @@ export default {
       }
     }
   },
-  mounted() {
-    if (this.listing) {
-      this.form = {
-        title: this.listing.title || '',
-        category_id: this.listing.category_id || '',
-        price: this.listing.price || 0,
-        condition_type: this.listing.condition_type || 'used',
-        location: this.listing.location || '',
-        description: this.listing.description || '',
-        image_url: this.listing.image_url || ''
-      }
-      // Show existing image
-      if (this.listing.image_url) {
-        this.imagePreview = this.listing.image_url
+  watch: {
+    listing: {
+      immediate: true,
+      handler(val) {
+        if (val) {
+          this.form = {
+            title: val.title || '',
+            category_id: val.category_id || '',
+            price: val.price || 0,
+            condition_type: val.condition_type || 'used',
+            location: val.location || '',
+            description: val.description || '',
+            image_url: val.image_url || ''
+          }
+          if (val.image_url) {
+            this.imagePreview = val.image_url
+          }
+        }
       }
     }
   },
@@ -178,21 +229,22 @@ export default {
     processFile(file) {
       if (!file) return
       
+      this.uploadError = null
+      
       // Validate file type - JPEG or PNG only
-      const validTypes = ['image/jpeg', 'image/png']
+      const validTypes = ['image/jpeg', 'image/png', 'image/jpg']
       if (!validTypes.includes(file.type)) {
-        alert('Please select a JPEG or PNG image only.')
+        this.uploadError = 'Please select a JPEG or PNG image only.'
         return
       }
       
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        alert('Image must be less than 5MB.')
+        this.uploadError = 'Image must be less than 5MB.'
         return
       }
       
       this.selectedFile = file
-      this.form.image_url = ''
       
       // Show preview
       const reader = new FileReader()
@@ -200,12 +252,18 @@ export default {
         this.imagePreview = e.target.result
       }
       reader.readAsDataURL(file)
+      
+      // Reset file input
+      if (this.$refs.fileInput) {
+        this.$refs.fileInput.value = ''
+      }
     },
     
     removeImage() {
       this.selectedFile = null
       this.imagePreview = null
       this.form.image_url = ''
+      this.uploadError = null
       // Reset file input
       if (this.$refs.fileInput) {
         this.$refs.fileInput.value = ''
@@ -216,26 +274,41 @@ export default {
       if (!this.selectedFile) return this.form.image_url || null
       
       this.uploading = true
+      this.uploadError = null
+      
       try {
         const formData = new FormData()
         formData.append('image', this.selectedFile)
         
-        const response = await fetch('http://localhost:3000/api/upload', {
-          method: 'POST',
-          body: formData
+        const response = await axios.post('http://localhost:3000/api/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          },
+          timeout: 30000 // 30 second timeout
         })
         
-        if (!response.ok) {
-          const errData = await response.json()
-          throw new Error(errData.error || 'Upload failed')
+        if (response.data && response.data.image_url) {
+          console.log('Image uploaded successfully:', response.data.image_url)
+          return response.data.image_url
+        } else {
+          throw new Error('No image URL returned from server')
         }
-        
-        const data = await response.json()
-        console.log('Image uploaded:', data.image_url)
-        return data.image_url
       } catch (err) {
         console.error('Image upload failed:', err)
-        alert('Failed to upload image: ' + err.message)
+        
+        let errorMessage = 'Failed to upload image. '
+        if (err.response) {
+          // Server responded with error
+          errorMessage += err.response.data?.error || err.response.statusText || 'Server error'
+        } else if (err.request) {
+          // Request made but no response
+          errorMessage += 'No response from server. Please check your connection.'
+        } else {
+          // Request setup error
+          errorMessage += err.message || 'Unknown error'
+        }
+        
+        this.uploadError = errorMessage
         return null
       } finally {
         this.uploading = false
@@ -243,24 +316,74 @@ export default {
     },
     
     async handleSubmit() {
+      // Validate required fields
+      if (!this.form.title.trim()) {
+        alert('Please enter a title for your listing.')
+        return
+      }
+      
+      if (!this.form.category_id) {
+        alert('Please select a category.')
+        return
+      }
+      
+      if (!this.form.price || this.form.price <= 0) {
+        alert('Please enter a valid price.')
+        return
+      }
+      
       // Upload image first if file selected
       if (this.selectedFile) {
         const imageUrl = await this.uploadImage()
         if (imageUrl) {
           this.form.image_url = imageUrl
         } else {
-          return // Don't submit if upload failed
+          // Don't submit if upload failed
+          return
         }
       }
       
-      // Require image for new listings
+      // Require image for new listings (optional for edit)
       if (!this.listing?.id && !this.form.image_url) {
         alert('Please upload an image for your listing.')
         return
       }
       
-      this.$emit('save', { ...this.form })
+      // Create a clean copy of the form data
+      const submitData = {
+        title: this.form.title.trim(),
+        category_id: parseInt(this.form.category_id),
+        price: parseFloat(this.form.price) || 0,
+        condition_type: this.form.condition_type,
+        location: this.form.location.trim(),
+        description: this.form.description.trim(),
+        image_url: this.form.image_url || ''
+      }
+      
+      console.log('Submitting listing data:', submitData)
+      this.$emit('save', submitData)
     }
   }
 }
 </script>
+
+<style scoped>
+/* Smooth scroll for modal */
+.modal-content {
+  scrollbar-width: thin;
+  scrollbar-color: var(--outline-variant) transparent;
+}
+
+.modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background: var(--outline-variant);
+  border-radius: 3px;
+}
+</style>

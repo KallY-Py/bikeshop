@@ -1,7 +1,12 @@
 <template>
   <div class="bg-surface-container-low border border-outline-variant rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all group">
     <div class="relative h-48 bg-surface overflow-hidden">
-      <img :src="listing.image || 'https://via.placeholder.com/400x300'" :alt="listing.title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" @error="onImageError"/>
+      <img 
+        :src="getImageUrl" 
+        :alt="listing.title" 
+        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+        @error="onImageError"
+      />
       <div class="absolute top-3 right-3 flex gap-2">
         <span class="px-2 py-1 rounded-full text-xs font-semibold uppercase tracking-wider" :class="statusClass">{{ listing.status }}</span>
       </div>
@@ -18,7 +23,7 @@
       <h3 class="font-headline-md text-headline-md text-on-surface mb-2 line-clamp-1">{{ listing.title }}</h3>
       <p class="text-sm text-on-surface-variant mb-3 line-clamp-2">{{ listing.description || 'No description' }}</p>
       <div class="flex justify-between items-center">
-        <span class="font-display text-2xl text-primary">${{ formatPrice(listing.price) }}</span>
+        <span class="font-display text-2xl text-primary">₱{{ formatPrice(listing.price) }}</span>
         <div class="flex items-center gap-1 text-on-surface-variant text-sm">
           <span class="material-symbols-outlined text-lg">visibility</span>
           <span>{{ listing.views || 0 }}</span>
@@ -46,6 +51,21 @@ export default {
       if (s === 'sold') return 'bg-tertiary/20 text-tertiary'
       if (s === 'rejected') return 'bg-error/20 text-error'
       return 'bg-primary/20 text-primary'
+    },
+    getImageUrl() {
+      // Check for image_url or image field
+      if (this.listing.image_url) {
+        return this.listing.image_url
+      }
+      if (this.listing.image) {
+        return this.listing.image
+      }
+      // Check if images array exists and has at least one image
+      if (this.listing.images && this.listing.images.length > 0) {
+        return this.listing.images[0]
+      }
+      // Fallback to placeholder
+      return 'https://via.placeholder.com/400x300?text=No+Image'
     }
   },
   methods: {

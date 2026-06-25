@@ -1,7 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-900 text-white flex overflow-hidden">
     
-    <!-- Admin Navigation Component -->
     <Admin_nav 
       :current-view="currentView" 
       :is-collapsed="isSidebarCollapsed"
@@ -9,33 +8,26 @@
       @logout="handleLogout" 
     />
 
-    <!-- Main Content Area -->
     <div class="flex-1 flex flex-col h-screen overflow-hidden relative">
       
-      <!-- Top Header -->
       <header class="h-16 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-6 z-10 shadow-sm">
-        <!-- Toggle Sidebar Button (Desktop) -->
         <button @click="toggleSidebar" class="hidden md:flex items-center text-gray-400 hover:text-white transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
 
-        <!-- Mobile Menu Button -->
         <button @click="toggleMobileMenu" class="md:hidden text-gray-400 hover:text-white">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
 
-        <!-- Centered Title -->
         <h2 class="text-xl font-bold text-white capitalize absolute left-1/2 transform -translate-x-1/2 hidden md:block">
           User Management
         </h2>
 
-        <!-- Right Side Icons -->
         <div class="flex items-center space-x-4 ml-auto">
-          <!-- Notification Bell -->
           <div class="relative">
             <span class="absolute top-0 right-0 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-gray-800"></span>
             <button class="text-gray-400 hover:text-orange-500 transition-colors p-1">
@@ -45,7 +37,6 @@
             </button>
           </div>
           
-          <!-- Profile Dropdown -->
           <div class="relative">
             <button @click="isProfileDropdownOpen = !isProfileDropdownOpen" class="flex items-center space-x-2 focus:outline-none">
               <img 
@@ -55,7 +46,6 @@
               >
             </button>
 
-            <!-- Dropdown Menu -->
             <div 
               v-if="isProfileDropdownOpen" 
               class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-xl py-2 border border-gray-700 z-50 origin-top-right transform transition-all"
@@ -80,18 +70,14 @@
         </div>
       </header>
 
-      <!-- Scrollable Content Area -->
       <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-900 p-6">
         
-        <!-- User Management Content -->
         <div class="space-y-6 animate-fade-in">
           
-          <!-- Header with Search and Filters -->
           <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <h2 class="text-2xl font-bold text-white">User Management</h2>
             
             <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-              <!-- Search Bar -->
               <div class="relative">
                 <input 
                   v-model="searchQuery"
@@ -104,7 +90,6 @@
                 </svg>
               </div>
 
-              <!-- Filter Dropdown -->
               <select 
                 v-model="sortBy"
                 class="bg-gray-800 border border-gray-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:border-orange-500"
@@ -117,7 +102,6 @@
             </div>
           </div>
 
-          <!-- Users Table -->
           <div class="bg-gray-800 rounded-xl border border-gray-700 shadow-lg overflow-hidden">
             <div class="overflow-x-auto">
               <table class="w-full text-left text-sm text-gray-400">
@@ -182,7 +166,6 @@
               </table>
             </div>
             
-            <!-- Empty State -->
             <div v-if="filteredUsers.length === 0" class="p-12 text-center text-gray-500">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -196,7 +179,6 @@
       </main>
     </div>
 
-    <!-- Edit User Modal -->
     <div v-if="showEditModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div class="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md border border-gray-700 animate-fade-in">
         <div class="flex items-center justify-between p-6 border-b border-gray-700">
@@ -264,7 +246,6 @@
       </div>
     </div>
 
-    <!-- Delete Confirmation Modal -->
     <div v-if="showDeleteModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div class="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md border border-gray-700 animate-fade-in">
         <div class="p-6 text-center">
@@ -324,7 +305,6 @@ export default {
     filteredUsers() {
       let filtered = [...this.users]
 
-      // Search filter
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase()
         filtered = filtered.filter(user => 
@@ -335,7 +315,6 @@ export default {
         )
       }
 
-      // Sorting
       switch (this.sortBy) {
         case 'newest':
           filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
@@ -370,7 +349,6 @@ export default {
     },
     
     toggleMobileMenu() {
-      // Handled by Admin_nav component
     },
 
     handleClickOutside(event) {
@@ -386,7 +364,6 @@ export default {
         this.users = response.data || []
       } catch (err) {
         console.error('Failed to load users:', err)
-        // Fallback dummy data
         this.users = [
           { id: 1, first_name: 'Admin', last_name: 'User', username: 'admin', email: 'admin@padyak.com', phone_number: '+63 123 456 7890', role: 'admin', status: 'active', created_at: '2026-01-01T00:00:00Z' },
           { id: 2, first_name: 'John', last_name: 'Doe', username: 'johndoe', email: 'john@example.com', phone_number: '+63 987 654 3210', role: 'user', status: 'active', created_at: '2026-01-15T00:00:00Z' },
