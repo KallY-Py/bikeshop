@@ -1,6 +1,5 @@
-<template>
+<!-- <template>
   <div class="bg-background text-on-background font-body-md min-h-screen flex flex-col md:flex-row">
-    <!-- TopNavBar (Mobile Only) -->
     <header class="md:hidden flex justify-between items-center px-margin-mobile h-16 w-full bg-background/80 backdrop-blur-md border-b border-outline-variant shadow-none sticky top-0 z-50">
       <div class="font-display text-headline-lg-mobile text-primary uppercase tracking-tighter">VeloHub</div>
       <div class="flex gap-4">
@@ -19,9 +18,7 @@
       </div>
     </header>
 
-    <!-- SideNavBar (Desktop) -->
     <nav class="hidden md:flex flex-col h-screen py-8 fixed left-0 top-0 w-[280px] bg-surface-container-low border-r border-outline-variant shadow-sm z-40">
-      <!-- User Profile Section -->
       <div class="px-6 mb-8 flex items-center gap-4">
         <div class="w-12 h-12 rounded-full overflow-hidden bg-surface border border-outline-variant">
           <img 
@@ -36,7 +33,6 @@
         </div>
       </div>
 
-      <!-- Navigation Links -->
       <div class="flex-1 overflow-y-auto mt-4">
         <a 
           v-for="item in navItems" 
@@ -53,7 +49,6 @@
         </a>
       </div>
 
-      <!-- Bottom Section -->
       <div class="px-6 mt-auto">
         <button 
           @click="postNewBike"
@@ -77,9 +72,7 @@
       </div>
     </nav>
 
-    <!-- Main Content -->
     <main class="flex-1 md:ml-[280px] p-margin-mobile md:p-margin-desktop pb-24 md:pb-margin-desktop">
-      <!-- Header -->
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-gutter gap-4">
         <div>
           <h1 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">Dashboard Overview</h1>
@@ -94,7 +87,6 @@
         </button>
       </div>
 
-      <!-- Loading State -->
       <div v-if="loading" class="flex justify-center items-center h-64">
         <div class="text-center">
           <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
@@ -102,7 +94,6 @@
         </div>
       </div>
 
-      <!-- Error State -->
       <div v-else-if="error" class="bg-error/10 border border-error/20 rounded-xl p-8 text-center">
         <span class="material-symbols-outlined text-error text-4xl mb-4">error</span>
         <p class="text-error font-label-md mb-4">{{ error }}</p>
@@ -114,9 +105,7 @@
         </button>
       </div>
 
-      <!-- Dashboard Content -->
       <div v-else>
-        <!-- Stats Cards Grid -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-gutter">
           <StatCard 
             v-for="stat in statsData" 
@@ -129,9 +118,7 @@
           />
         </div>
 
-        <!-- Content Grid: Listings & Messages -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
-          <!-- My Listings Table -->
           <div class="lg:col-span-2 bg-surface-container-low border border-outline-variant rounded-xl shadow-sm overflow-hidden flex flex-col">
             <div class="p-6 border-b border-outline-variant flex justify-between items-center">
               <h2 class="font-headline-md text-headline-md text-on-surface">My Listings</h2>
@@ -171,7 +158,6 @@
             </div>
           </div>
 
-          <!-- Messages Section -->
           <div class="bg-surface-container-low border border-outline-variant rounded-xl shadow-sm flex flex-col">
             <div class="p-6 border-b border-outline-variant flex justify-between items-center">
               <h2 class="font-headline-md text-headline-md text-on-surface">Messages</h2>
@@ -194,7 +180,6 @@
       </div>
     </main>
 
-    <!-- BottomNavBar (Mobile Only) -->
     <nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 md:hidden bg-surface-container-lowest/95 backdrop-blur-lg border-t border-outline-variant shadow-[0_-4px_10px_rgba(0,0,0,0.3)] rounded-t-xl">
       <a 
         v-for="item in mobileNavItems" 
@@ -221,14 +206,13 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { userDashboardService } from '@/services/userService'
-import StatCard from '@/components/user/StatCard.vue'
-import ListingRow from '@/components/user/ListingRow.vue'
-import MessageItem from '@/components/user/MessageItem.vue'
+// import { userDashboardService } from '@/services/userService'
+// import StatCard from '@/components/user/StatCard.vue'
+// import ListingRow from '@/components/user/ListingRow.vue'
+// import MessageItem from '@/components/user/MessageItem.vue'
 
 const router = useRouter()
 
-// State
 const activeNav = ref('Overview')
 const loading = ref(true)
 const error = ref(null)
@@ -237,7 +221,6 @@ const userProfile = ref({
   status: 'Rider Elite Status'
 })
 
-// Stats data initialized with zeros - will be populated from API
 const statsData = ref([
   {
     title: 'Active Listings',
@@ -265,11 +248,9 @@ const statsData = ref([
   }
 ])
 
-// Empty arrays - will be populated from API
 const listings = ref([])
 const messages = ref([])
 
-// Navigation items
 const navItems = [
   { name: 'Overview', icon: 'dashboard', href: '#' },
   { name: 'My Listings', icon: 'directions_bike', href: '#' },
@@ -290,7 +271,6 @@ const mobileNavItems = [
   { name: 'Profile', icon: 'person', href: '#' }
 ]
 
-// Methods
 const setActiveNav = (name) => {
   activeNav.value = name
 }
@@ -323,42 +303,34 @@ const openConversation = (messageId) => {
   console.log('Open conversation:', messageId)
 }
 
-// Load dashboard data from Go backend API
 const loadDashboardData = async () => {
   try {
     loading.value = true
     error.value = null
     
-    // Get user ID from local storage (set during login)
     const userId = localStorage.getItem('userId') || '1'
     
     console.log('Fetching dashboard for user:', userId)
     
-    // Fetch dashboard stats from Go backend
-    const dashboardResponse = await userDashboardService.getDashboard(userId)
+    // const dashboardResponse = await userDashboardService.getDashboard(userId)
     const dashboardData = dashboardResponse.data
     
     console.log('Dashboard data received:', dashboardData)
     
-    // Update stats with real data
     statsData.value[0].value = (dashboardData.active_listings || 0).toString()
     
-    // Format total sales as currency
     const totalSales = dashboardData.total_sales || 0
     statsData.value[1].value = `$${totalSales.toLocaleString()}`
     
-    // Update unread messages count
     statsData.value[2].value = (dashboardData.unread_messages || 0).toString()
     statsData.value[2].title = 'Unread Messages'
     statsData.value[2].icon = 'mail'
     
-    // Fetch user's listings from Go backend
     console.log('Fetching listings...')
-    const listingsResponse = await userDashboardService.getListings(userId)
+    // const listingsResponse = await userDashboardService.getListings(userId)
     const listingsData = listingsResponse.data || []
     console.log('Listings received:', listingsData)
     
-    // Transform listings data for display
     listings.value = listingsData.map(listing => ({
       id: listing.id,
       model: listing.title,
@@ -368,13 +340,11 @@ const loadDashboardData = async () => {
       price: `$${(listing.price || 0).toLocaleString()}`
     }))
     
-    // Fetch user's messages from Go backend
     console.log('Fetching messages...')
-    const messagesResponse = await userDashboardService.getMessages(userId)
+    // const messagesResponse = await userDashboardService.getMessages(userId)
     const messagesData = messagesResponse.data || []
     console.log('Messages received:', messagesData)
     
-    // Transform messages data for display
     messages.value = messagesData.map(msg => ({
       id: msg.id,
       sender: {
@@ -389,7 +359,6 @@ const loadDashboardData = async () => {
     console.error('Failed to load dashboard data:', err)
     error.value = `Failed to connect to server: ${err.message}. Make sure the Go backend is running on port 3000.`
     
-    // Keep empty states visible instead of showing demo data
     statsData.value[0].value = '0'
     statsData.value[1].value = '$0'
     statsData.value[2].value = '0'
@@ -401,7 +370,6 @@ const loadDashboardData = async () => {
   }
 }
 
-// Helper function to format time
 const formatTimeAgo = (dateString) => {
   if (!dateString) return 'Recently'
   
@@ -418,8 +386,7 @@ const formatTimeAgo = (dateString) => {
   return date.toLocaleDateString()
 }
 
-// Lifecycle
 onMounted(() => {
   loadDashboardData()
 })
-</script>
+</script> -->

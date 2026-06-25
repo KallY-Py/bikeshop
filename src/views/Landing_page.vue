@@ -1,9 +1,7 @@
 <template>
   <div class="min-h-screen bg-gray-900 text-white">
-    <!-- Navigation Bar Component -->
     <Main_nav />
 
-    <!-- Hero Section -->
     <section id="home" class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
       <div class="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-900 to-orange-900/20"></div>
       <div class="relative max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 text-center">
@@ -17,7 +15,6 @@
           Buy and sell bikes, parts, and accessories. Thousands of listings from passionate cyclists near you.
         </p>
         
-        <!-- Search Box -->
         <div class="max-w-2xl mx-auto mb-12">
           <div class="flex bg-gray-800 rounded-lg p-2 border border-gray-700">
             <input 
@@ -31,7 +28,6 @@
           </div>
         </div>
 
-        <!-- Stats -->
         <div class="flex justify-center items-center space-x-6 text-sm">
           <div class="text-center">
             <span class="block text-2xl font-bold text-orange-500">500+</span>
@@ -49,7 +45,6 @@
       </div>
     </section>
 
-    <!-- Unleash Potential Section -->
     <section class="py-20 bg-gray-800/50">
       <div class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
         <div class="grid md:grid-cols-2 gap-12 items-center">
@@ -81,7 +76,6 @@
       </div>
     </section>
 
-    <!-- Featured Listings -->
     <section id="bikes" class="py-20">
       <div class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
         <div class="flex justify-between items-center mb-12">
@@ -93,7 +87,6 @@
         </div>
 
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <!-- Bike Card 1 -->
           <div class="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 hover:border-orange-500/50 transition-all hover:transform hover:scale-105">
             <img 
               src="https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?w=600&h=400&fit=crop" 
@@ -110,7 +103,6 @@
             </div>
           </div>
 
-          <!-- Bike Card 2 -->
           <div class="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 hover:border-orange-500/50 transition-all hover:transform hover:scale-105">
             <img 
               src="https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=600&h=400&fit=crop" 
@@ -127,7 +119,6 @@
             </div>
           </div>
 
-          <!-- Bike Card 3 -->
           <div class="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 hover:border-orange-500/50 transition-all hover:transform hover:scale-105">
             <img 
               src="https://images.unsplash.com/photo-1576435728678-38d01d52e0a5?w=600&h=400&fit=crop" 
@@ -147,7 +138,6 @@
       </div>
     </section>
 
-    <!-- Categories Section - The Armory -->
     <section class="py-20 bg-gray-800/50">
       <div class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
         <div class="text-center mb-12">
@@ -156,7 +146,6 @@
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <!-- Category 1 -->
           <div class="group relative overflow-hidden rounded-lg cursor-pointer">
             <img 
               src="https://images.unsplash.com/photo-1517649763962-0c623066013b?w=400&h=500&fit=crop" 
@@ -170,7 +159,6 @@
             </div>
           </div>
 
-          <!-- Category 2 -->
           <div class="group relative overflow-hidden rounded-lg cursor-pointer">
             <img 
               src="https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=400&h=500&fit=crop" 
@@ -184,7 +172,6 @@
             </div>
           </div>
 
-          <!-- Category 3 -->
           <div class="group relative overflow-hidden rounded-lg cursor-pointer">
             <img 
               src="https://images.unsplash.com/photo-1507035895480-2b3156c31fc8?w=400&h=500&fit=crop" 
@@ -198,7 +185,6 @@
             </div>
           </div>
 
-          <!-- Category 4 -->
           <div class="group relative overflow-hidden rounded-lg cursor-pointer">
             <img 
               src="https://images.unsplash.com/photo-1558521766-522130451a7a?w=400&h=500&fit=crop" 
@@ -215,7 +201,6 @@
       </div>
     </section>
 
-    <!-- CTA Section -->
     <section class="py-20">
       <div class="max-w-5xl mx-auto px-2 sm:px-4 lg:px-6">
         <div class="bg-gradient-to-r from-orange-600 to-orange-500 rounded-2xl px-8 py-12 text-center">
@@ -233,7 +218,6 @@
       </div>
     </section>
 
-    <!-- Footer -->
     <footer class="bg-gray-900 border-t border-gray-800 py-12">
       <div class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
         <div class="grid md:grid-cols-4 gap-6 mb-8">
@@ -275,13 +259,29 @@
 </template>
 
 <script setup>
-import Main_nav from '@/components/Main_nav.vue' 
-// Note: If you don't have the '@' alias configured in your vite.config.js or vue.config.js, 
-// change the import path to: import Main_nav from '../components/Main_nav.vue'
+import Main_nav from '@/components/Main_nav.vue'
+import { onMounted } from 'vue'
+
+const scrollToSection = () => {
+  const hash = window.location.hash
+  if (hash) {
+    const element = document.querySelector(hash)
+    if (element) {
+      setTimeout(() => {
+        element.scrollIntoView({ behavior: 'smooth' })
+      }, 100)
+    }
+  }
+}
+
+onMounted(() => {
+  scrollToSection()
+  
+  window.addEventListener('hashchange', scrollToSection)
+})
 </script>
 
 <style scoped>
-/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
 }
@@ -299,7 +299,6 @@ import Main_nav from '@/components/Main_nav.vue'
   background: #ea580c;
 }
 
-/* Smooth scroll */
 html {
   scroll-behavior: smooth;
 }

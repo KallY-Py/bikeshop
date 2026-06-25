@@ -1,18 +1,14 @@
 <template>
   <div class="min-h-screen bg-gray-900 text-white">
-    <!-- Navigation Bar Component -->
     <Main_nav />
 
-    <!-- Main Content -->
     <main class="flex-grow pt-24 pb-20 md:pb-8 max-w-7xl mx-auto w-full px-2 sm:px-4 lg:px-6 flex gap-6">
-      <!-- Sidebar Filter (Desktop) -->
       <aside class="hidden md:flex flex-col w-[280px] flex-shrink-0 sticky top-24 h-[calc(100vh-96px)] overflow-y-auto custom-scrollbar pr-4">
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-2xl font-bold text-white">Filters</h2>
           <button class="text-orange-500 text-sm font-medium hover:underline">Clear all</button>
         </div>
         
-        <!-- Categories -->
         <div class="mb-8 border-b border-gray-700 pb-6">
           <h3 class="text-sm font-semibold text-gray-400 mb-4 uppercase tracking-wider">Category</h3>
           <ul class="space-y-3 text-base text-white">
@@ -49,7 +45,6 @@
           </ul>
         </div>
 
-        <!-- Price Range -->
         <div class="mb-8 border-b border-gray-700 pb-6">
           <h3 class="text-sm font-semibold text-gray-400 mb-4 uppercase tracking-wider">Price Range</h3>
           <div class="flex items-center gap-2">
@@ -65,7 +60,6 @@
           </div>
         </div>
 
-        <!-- Condition -->
         <div class="mb-8 border-b border-gray-700 pb-6">
           <h3 class="text-sm font-semibold text-gray-400 mb-4 uppercase tracking-wider">Condition</h3>
           <div class="flex flex-wrap gap-2">
@@ -76,7 +70,6 @@
           </div>
         </div>
 
-        <!-- Frame Size -->
         <div class="mb-8">
           <h3 class="text-sm font-semibold text-gray-400 mb-4 uppercase tracking-wider">Frame Size</h3>
           <div class="grid grid-cols-3 gap-2">
@@ -94,9 +87,7 @@
         </button>
       </aside>
 
-      <!-- Product Grid -->
       <div class="flex-grow pt-4 md:pt-8 w-full">
-        <!-- Sorting & Results count -->
         <div class="flex justify-between items-center mb-8">
           <h1 class="text-3xl font-bold text-white">Explore Bikes</h1>
           <div class="flex items-center gap-2 text-gray-400 text-base">
@@ -110,9 +101,7 @@
           </div>
         </div>
 
-        <!-- Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <!-- Card 1 (Featured - Large) -->
           <div class="col-span-1 sm:col-span-2 lg:col-span-2 group bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-orange-500/50 transition-all flex flex-col sm:flex-row relative">
             <div class="absolute top-4 right-4 z-10">
               <button class="w-10 h-10 rounded-full bg-gray-900/80 backdrop-blur-sm flex items-center justify-center text-gray-400 hover:text-orange-500 transition-all">
@@ -147,7 +136,6 @@
             </div>
           </div>
 
-          <!-- Card 2 -->
           <div class="col-span-1 group bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-orange-500/50 transition-all flex flex-col relative">
             <div class="absolute top-4 right-4 z-10">
               <button class="w-8 h-8 rounded-full bg-gray-900/80 backdrop-blur-sm flex items-center justify-center text-gray-400 hover:text-orange-500 transition-all">
@@ -173,7 +161,6 @@
             </div>
           </div>
 
-          <!-- Card 3 -->
           <div class="col-span-1 group bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-orange-500/50 transition-all flex flex-col relative">
             <div class="absolute top-4 right-4 z-10">
               <button class="w-8 h-8 rounded-full bg-gray-900/80 backdrop-blur-sm flex items-center justify-center text-orange-500 transition-all">
@@ -199,7 +186,6 @@
             </div>
           </div>
 
-          <!-- Card 4 (Parts) -->
           <div class="col-span-1 group bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-orange-500/50 transition-all flex flex-col relative">
             <div class="absolute top-4 right-4 z-10">
               <button class="w-8 h-8 rounded-full bg-gray-900/80 backdrop-blur-sm flex items-center justify-center text-gray-400 hover:text-orange-500 transition-all">
@@ -228,7 +214,6 @@
             </div>
           </div>
 
-          <!-- Card 5 -->
           <div class="col-span-1 group bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-orange-500/50 transition-all flex flex-col relative">
             <div class="absolute top-4 right-4 z-10">
               <button class="w-8 h-8 rounded-full bg-gray-900/80 backdrop-blur-sm flex items-center justify-center text-gray-400 hover:text-orange-500 transition-all">
@@ -255,7 +240,6 @@
           </div>
         </div>
 
-        <!-- Load More -->
         <div class="mt-12 flex justify-center">
           <button class="px-8 py-3 rounded-lg border border-gray-700 text-white hover:text-orange-500 hover:border-orange-500 transition-colors font-semibold text-sm bg-gray-800 hover:bg-gray-700">
             Load More Results
@@ -268,11 +252,9 @@
 
 <script setup>
 import Main_nav from '@/components/Main_nav.vue'
-// Note: If you don't have the '@' alias configured, change to: import Main_nav from '../components/Main_nav.vue'
 </script>
 
 <style scoped>
-/* Custom scrollbar for the main page */
 ::-webkit-scrollbar {
   width: 10px;
 }
@@ -290,7 +272,6 @@ import Main_nav from '@/components/Main_nav.vue'
   background: #ea580c;
 }
 
-/* Custom scrollbar for the sidebar */
 .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
 }
@@ -298,7 +279,7 @@ import Main_nav from '@/components/Main_nav.vue'
     background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: #374151; /* gray-700 */
+    background-color: #374151; 
     border-radius: 20px;
 }
 </style>

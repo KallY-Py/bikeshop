@@ -1,6 +1,5 @@
 <template>
   <div class="bg-background text-on-background font-body-md min-h-screen flex flex-col md:flex-row">
-    <!-- TopNavBar (Mobile Only) -->
     <header class="md:hidden flex justify-between items-center px-margin-mobile h-16 w-full bg-background/80 backdrop-blur-md border-b border-outline-variant shadow-none sticky top-0 z-50">
       <div class="font-display text-headline-lg-mobile text-primary uppercase tracking-tighter">VeloHub</div>
       <div class="flex gap-4">
@@ -9,7 +8,6 @@
       </div>
     </header>
 
-    <!-- SideNavBar (Desktop) -->
     <nav class="hidden md:flex flex-col h-screen py-8 fixed left-0 top-0 w-[280px] bg-surface-container-low border-r border-outline-variant shadow-sm z-40">
       <div class="px-6 mb-8 flex items-center gap-4">
         <div class="w-12 h-12 rounded-full overflow-hidden bg-surface border border-outline-variant">
@@ -47,9 +45,7 @@
       </div>
     </nav>
 
-    <!-- Main Content -->
     <main class="flex-1 md:ml-[280px] p-margin-mobile md:p-margin-desktop pb-24 md:pb-margin-desktop">
-      <!-- Header -->
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-gutter gap-4">
         <div>
           <h1 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">My Listings</h1>
@@ -64,7 +60,6 @@
         </button>
       </div>
 
-      <!-- Filters and Search -->
       <div class="flex flex-col sm:flex-row gap-4 mb-6">
         <div class="flex-1 relative">
           <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
@@ -97,7 +92,6 @@
         </select>
       </div>
 
-      <!-- Loading State -->
       <div v-if="loading" class="flex justify-center items-center h-64">
         <div class="text-center">
           <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
@@ -105,7 +99,6 @@
         </div>
       </div>
 
-      <!-- Error State -->
       <div v-else-if="error" class="bg-error/10 border border-error/20 rounded-xl p-8 text-center">
         <span class="material-symbols-outlined text-error text-4xl mb-4">error</span>
         <p class="text-error font-label-md mb-4">{{ error }}</p>
@@ -117,7 +110,6 @@
         </button>
       </div>
 
-      <!-- Listings Grid -->
       <div v-else>
         <div v-if="filteredListings.length === 0" class="text-center py-16">
           <span class="material-symbols-outlined text-6xl text-on-surface-variant mb-4">directions_bike</span>
@@ -143,7 +135,6 @@
           />
         </div>
 
-        <!-- Pagination -->
         <div v-if="totalPages > 1" class="flex justify-center items-center gap-2 mt-8">
           <button 
             @click="currentPage--"
@@ -166,7 +157,6 @@
       </div>
     </main>
 
-    <!-- Add/Edit Listing Modal -->
     <ListingModal 
       v-if="showAddModal || showEditModal"
       :listing="editingListing"
@@ -175,7 +165,6 @@
       @save="saveListing"
     />
 
-    <!-- Delete Confirmation Modal -->
     <div v-if="showDeleteModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div class="bg-surface-container-high border border-outline-variant rounded-xl p-6 max-w-md w-full">
         <h3 class="font-headline-md text-headline-md text-on-surface mb-4">Delete Listing</h3>
@@ -197,7 +186,6 @@
       </div>
     </div>
 
-    <!-- BottomNavBar (Mobile Only) -->
     <nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 md:hidden bg-surface-container-lowest/95 backdrop-blur-lg border-t border-outline-variant shadow-[0_-4px_10px_rgba(0,0,0,0.3)] rounded-t-xl">
       <router-link 
         v-for="item in mobileNavItems" 
@@ -225,7 +213,6 @@ import ListingModal from '@/components/user/ListingModal.vue'
 
 const router = useRouter()
 
-// State
 const loading = ref(true)
 const error = ref(null)
 const searchQuery = ref('')
@@ -234,18 +221,15 @@ const sortBy = ref('newest')
 const currentPage = ref(1)
 const itemsPerPage = 9
 
-// Modal states
 const showAddModal = ref(false)
 const showEditModal = ref(false)
 const showDeleteModal = ref(false)
 const editingListing = ref(null)
 const deletingListing = ref(null)
 
-// Data
 const listings = ref([])
 const categories = ref([])
 
-// Navigation
 const navItems = [
   { name: 'Overview', icon: 'dashboard', path: '/dashboard' },
   { name: 'My Listings', icon: 'directions_bike', path: '/dashboard/listings' },
@@ -261,11 +245,9 @@ const mobileNavItems = [
   { name: 'Profile', icon: 'person', path: '/profile' }
 ]
 
-// Computed
 const filteredListings = computed(() => {
   let filtered = [...listings.value]
   
-  // Search filter
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
     filtered = filtered.filter(listing => 
@@ -274,12 +256,10 @@ const filteredListings = computed(() => {
     )
   }
   
-  // Status filter
   if (statusFilter.value) {
     filtered = filtered.filter(listing => listing.status === statusFilter.value)
   }
   
-  // Sort
   switch (sortBy.value) {
     case 'oldest':
       filtered.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
@@ -293,7 +273,7 @@ const filteredListings = computed(() => {
     case 'views':
       filtered.sort((a, b) => (b.views || 0) - (a.views || 0))
       break
-    default: // newest
+    default: 
       filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
   }
   
@@ -302,7 +282,6 @@ const filteredListings = computed(() => {
 
 const totalPages = computed(() => Math.ceil(filteredListings.value.length / itemsPerPage))
 
-// Methods
 const loadListings = async () => {
   try {
     loading.value = true
@@ -341,7 +320,6 @@ const confirmDelete = (listing) => {
 
 const deleteListing = async () => {
   try {
-    // TODO: Add delete API endpoint
     listings.value = listings.value.filter(l => l.id !== deletingListing.value.id)
     showDeleteModal.value = false
     deletingListing.value = null
@@ -353,13 +331,11 @@ const deleteListing = async () => {
 const saveListing = async (listingData) => {
   try {
     if (editingListing.value?.id) {
-      // Update existing listing
       const index = listings.value.findIndex(l => l.id === editingListing.value.id)
       if (index !== -1) {
         listings.value[index] = { ...listings.value[index], ...listingData }
       }
     } else {
-      // Add new listing
       const userId = localStorage.getItem('userId') || '1'
       const response = await userDashboardService.createListing({
         ...listingData,
@@ -368,7 +344,7 @@ const saveListing = async (listingData) => {
       listings.value.unshift(response.data)
     }
     closeModal()
-    await loadListings() // Reload to get fresh data
+    await loadListings() 
   } catch (err) {
     console.error('Failed to save listing:', err)
   }
@@ -384,7 +360,6 @@ const viewListing = (listing) => {
   router.push(`/listings/${listing.id}`)
 }
 
-// Lifecycle
 onMounted(() => {
   loadListings()
   loadCategories()
