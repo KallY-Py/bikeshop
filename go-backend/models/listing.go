@@ -22,5 +22,6 @@ type ListingWithDetails struct {
 	CategoryName string   `json:"category_name"`
 	CategoryType string   `json:"category_type"`
 	SellerName   string   `json:"seller_name"`
+	SellerEmail  string   `json:"seller_email"`
 	Images       []string `json:"images,omitempty"`
 }

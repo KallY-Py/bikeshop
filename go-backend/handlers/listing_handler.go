@@ -21,12 +21,27 @@ func NewListingHandler() *ListingHandler {
 	}
 }
 
+// GetListings handles GET /api/listings (Public)
 func (h *ListingHandler) GetListings(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	listings, err := h.repo.GetAll()
 	if err != nil {
 		http.Error(w, `{"error":"Failed to fetch listings"}`, http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(listings)
+}
+
+// GetAdminListings handles GET /api/admin/listings
+// Returns listings with joined User and Category details
+func (h *ListingHandler) GetAdminListings(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	listings, err := h.repo.GetAllWithDetails()
+	if err != nil {
+		http.Error(w, `{"error":"Failed to fetch admin listings"}`, http.StatusInternalServerError)
 		return
 	}
 

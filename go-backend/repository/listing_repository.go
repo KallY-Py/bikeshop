@@ -59,11 +59,63 @@ func (r *ListingRepository) GetAll() ([]models.Listing, error) {
 	return listings, nil
 }
 
+// GetAllWithDetails fetches listings joined with user and category info for Admin View
+func (r *ListingRepository) GetAllWithDetails() ([]models.ListingWithDetails, error) {
+	query := `SELECT l.id, l.user_id, l.category_id, l.title, l.description, l.price, 
+              l.condition_type, l.location, l.status, l.views, l.created_at, l.updated_at,
+              c.name as category_name, c.type as category_type, 
+              CONCAT(u.first_name, ' ', u.last_name) as seller_name, u.email as seller_email
+              FROM listings l
+              JOIN categories c ON l.category_id = c.id
+              JOIN users u ON l.user_id = u.id
+              ORDER BY l.created_at DESC`
+
+	rows, err := config.DB.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var listings []models.ListingWithDetails
+	for rows.Next() {
+		var listing models.ListingWithDetails
+
+		var description sql.NullString
+		var location sql.NullString
+
+		err := rows.Scan(
+			&listing.ID, &listing.UserID, &listing.CategoryID,
+			&listing.Title, &description, &listing.Price,
+			&listing.ConditionType, &location, &listing.Status,
+			&listing.Views, &listing.CreatedAt, &listing.UpdatedAt,
+			&listing.CategoryName, &listing.CategoryType,
+			&listing.SellerName, &listing.SellerEmail,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		if description.Valid {
+			listing.Description = &description.String
+		}
+		if location.Valid {
+			listing.Location = &location.String
+		}
+
+		// Fetch images for each listing
+		images, _ := r.GetListingImages(listing.ID)
+		listing.Images = images
+
+		listings = append(listings, listing)
+	}
+	return listings, nil
+}
+
 func (r *ListingRepository) GetByID(id int64) (*models.ListingWithDetails, error) {
 	listing := &models.ListingWithDetails{}
 	query := `SELECT l.id, l.user_id, l.category_id, l.title, l.description, l.price, 
               l.condition_type, l.location, l.status, l.views, l.created_at, l.updated_at,
-              c.name, c.type, CONCAT(u.first_name, ' ', u.last_name) as seller_name
+              c.name, c.type, CONCAT(u.first_name, ' ', u.last_name) as seller_name, u.email as seller_email
               FROM listings l
               JOIN categories c ON l.category_id = c.id
               JOIN users u ON l.user_id = u.id
@@ -78,7 +130,7 @@ func (r *ListingRepository) GetByID(id int64) (*models.ListingWithDetails, error
 		&listing.Title, &description, &listing.Price,
 		&listing.ConditionType, &location, &listing.Status,
 		&listing.Views, &listing.CreatedAt, &listing.UpdatedAt,
-		&listing.CategoryName, &listing.CategoryType, &listing.SellerName,
+		&listing.CategoryName, &listing.CategoryType, &listing.SellerName, &listing.SellerEmail,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {

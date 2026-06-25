@@ -44,7 +44,7 @@ func main() {
 	api.HandleFunc("/auth/register", authHandler.Register).Methods("POST")
 	api.HandleFunc("/auth/login", authHandler.Login).Methods("POST")
 
-	// User routes
+	// User routes (Public/General)
 	api.HandleFunc("/users", userHandler.GetUsers).Methods("GET")
 	api.HandleFunc("/users/{id}", userHandler.GetUser).Methods("GET")
 	api.HandleFunc("/users", userHandler.CreateUser).Methods("POST")
@@ -60,7 +60,7 @@ func main() {
 	protected.Use(middleware.AuthMiddleware)
 	protected.HandleFunc("/profile", userHandler.GetProfile).Methods("GET")
 
-	// Listing routes
+	// Listing routes (Public)
 	api.HandleFunc("/listings", listingHandler.GetListings).Methods("GET")
 	api.HandleFunc("/listings/{id}", listingHandler.GetListing).Methods("GET")
 	api.HandleFunc("/listings", listingHandler.CreateListing).Methods("POST")
@@ -73,6 +73,18 @@ func main() {
 	// Category routes
 	api.HandleFunc("/categories", categoryHandler.GetCategories).Methods("GET")
 
+	// --- ADMIN ROUTES ---
+	admin := api.PathPrefix("/admin").Subrouter()
+	admin.Use(middleware.AuthMiddleware)  // Ensure user is logged in
+	admin.Use(middleware.AdminMiddleware) // Ensure user is an admin
+
+	// Admin Listing Management
+	admin.HandleFunc("/listings", listingHandler.GetAdminListings).Methods("GET")
+	admin.HandleFunc("/listings/{id}/status", listingHandler.UpdateListingStatus).Methods("PATCH")
+
+	// Admin User Management
+	admin.HandleFunc("/users", userHandler.GetUsers).Methods("GET")
+
 	// Health check
 	api.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -81,11 +93,11 @@ func main() {
 
 	// CORS configuration
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
+		AllowedOrigins:   []string{"*"}, // Allow all origins for development
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
 		AllowedHeaders:   []string{"*"},
 		AllowCredentials: false,
-		Debug:            false,
+		Debug:            true, // Set to true to see CORS logs in terminal
 	})
 
 	handler := c.Handler(r)

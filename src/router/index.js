@@ -5,6 +5,7 @@ import RegisterLoginView from '../views/Register_login.vue'
 import AdminDashboard from '../views/admin/admin_dashboard.vue'
 import AdminManagement from '../views/admin/admin_management.vue'
 import AdminReported from '../views/admin/admin_reported.vue'
+import AdminCategories from '../views/admin/admin_categories.vue'
 
 const routes = [
   // Public routes
@@ -41,6 +42,12 @@ const routes = [
     path: '/admin/reported',
     name: 'admin-reported',
     component: AdminReported,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/admin/categories',
+    name: 'admin-categories',
+    component: AdminCategories,
     meta: { requiresAuth: true, requiresAdmin: true }
   },
   
