@@ -26,6 +26,7 @@ func main() {
 	listingHandler := handlers.NewListingHandler()
 	categoryHandler := handlers.NewCategoryHandler()
 	authHandler := handlers.NewAuthHandler()
+	dashboardHandler := handlers.NewDashboardHandler()
 
 	// API Routes
 	api := r.PathPrefix("/api").Subrouter()
@@ -38,6 +39,12 @@ func main() {
 	api.HandleFunc("/users", userHandler.GetUsers).Methods("GET")
 	api.HandleFunc("/users/{id}", userHandler.GetUser).Methods("GET")
 	api.HandleFunc("/users", userHandler.CreateUser).Methods("POST")
+	api.HandleFunc("/users/{id}", userHandler.UpdateUserByID).Methods("PUT")
+
+	// Dashboard routes
+	api.HandleFunc("/dashboard/{userId}", dashboardHandler.GetUserDashboard).Methods("GET")
+	api.HandleFunc("/dashboard/{userId}/listings", dashboardHandler.GetUserListings).Methods("GET")
+	api.HandleFunc("/dashboard/{userId}/messages", dashboardHandler.GetUserMessages).Methods("GET")
 
 	// Protected routes example
 	protected := api.PathPrefix("/protected").Subrouter()
@@ -48,6 +55,8 @@ func main() {
 	api.HandleFunc("/listings", listingHandler.GetListings).Methods("GET")
 	api.HandleFunc("/listings/{id}", listingHandler.GetListing).Methods("GET")
 	api.HandleFunc("/listings", listingHandler.CreateListing).Methods("POST")
+	api.HandleFunc("/listings/{id}", listingHandler.UpdateListing).Methods("PUT")    
+	api.HandleFunc("/listings/{id}", listingHandler.DeleteListing).Methods("DELETE")
 
 	// Category routes
 	api.HandleFunc("/categories", categoryHandler.GetCategories).Methods("GET")

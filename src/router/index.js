@@ -3,11 +3,8 @@ import LandingPage from '../views/Landing_page.vue'
 import MarketPlace from '../views/Market_place.vue'
 import RegisterLoginView from '../views/Register_login.vue'
 
-import AdminDashboard from '../views/admin/admin_dashboard.vue'
-
-// import UserDashboard from '../views/users/user_dashboard.vue'
-
 const routes = [
+  // Public routes
   {
     path: '/',
     name: 'landing',
@@ -23,18 +20,52 @@ const routes = [
     name: 'market',
     component: MarketPlace
   },
+  
+  // Admin routes
   {
-    path: '/admin/dashboard',
+    path: '/admin',
     name: 'admin-dashboard',
-    component: AdminDashboard,
+    component: () => import('../views/admin/admin_dashboard.vue'),
     meta: { requiresAuth: true, requiresAdmin: true }
   },
-  // {
-  //   path: '/user/dashboard',
-  //   name: 'user-dashboard',
-  //   component: UserDashboard,
-  //   meta: { requiresAuth: true }
-  // }
+  
+  // User routes - FLAT, no nesting, each page handles its own layout
+  {
+    path: '/dashboard',
+    name: 'user-dashboard',
+    component: () => import('../views/users/user_dashboard.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/dashboard/listings',
+    name: 'my-listings',
+    component: () => import('../views/users/my_listings.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/dashboard/sales',
+    name: 'sales',
+    component: () => import('../views/users/sales.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/dashboard/analytics',
+    name: 'analytics',
+    component: () => import('../views/users/analytics.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/dashboard/messages',
+    name: 'messages',
+    component: () => import('../views/users/messages.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/settings',
+    name: 'profile-settings',
+    component: () => import('../views/users/profile_settings.vue'),
+    meta: { requiresAuth: true }
+  }
 ]
 
 const router = createRouter({
@@ -51,6 +82,7 @@ const router = createRouter({
   }
 })
 
+// Navigation guard
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token')
   const userStr = localStorage.getItem('user')
@@ -65,17 +97,33 @@ router.beforeEach((to, from, next) => {
     }
   }
 
-  if (to.meta.requiresAuth) {
+  // If route requires authentication
+  if (to.matched.some(record => record.meta.requiresAuth)) {
     if (!token) {
-      next('/register-login')
-    } else if (to.meta.requiresAdmin && userRole !== 'admin') {
-      next('/user/dashboard')
-    } else {
-      next()
+      next({
+        name: 'register-login',
+        query: { redirect: to.fullPath }
+      })
+      return
     }
-  } else {
-    next()
+    
+    if (to.meta.requiresAdmin && userRole !== 'admin') {
+      next({ name: 'user-dashboard' })
+      return
+    }
   }
+  
+  // Redirect logged-in users away from login page
+  if (to.name === 'register-login' && token) {
+    if (userRole === 'admin') {
+      next({ name: 'admin-dashboard' })
+    } else {
+      next({ name: 'user-dashboard' })
+    }
+    return
+  }
+  
+  next()
 })
 
 export default router

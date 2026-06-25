@@ -94,12 +94,26 @@ func (r *UserRepository) Create(user *models.User) (int64, error) {
 }
 
 func (r *UserRepository) Update(user *models.User) error {
-    query := `UPDATE users SET first_name=?, last_name=?, username=?, 
-              email=?, phone_number=?, profile_image=? WHERE id=?`
+    query := `UPDATE users SET 
+        first_name = ?, 
+        last_name = ?, 
+        username = ?, 
+        email = ?, 
+        phone_number = ?, 
+        profile_image = ?,
+        bio = ?,
+        location = ?
+        WHERE id = ?`
     
     _, err := config.DB.Exec(query,
-        user.FirstName, user.LastName, user.Username,
-        user.Email, user.PhoneNumber, user.ProfileImage,
+        user.FirstName, 
+        user.LastName, 
+        user.Username,
+        user.Email, 
+        user.PhoneNumber, 
+        user.ProfileImage,
+        user.Bio,
+        user.Location,
         user.ID,
     )
     return err

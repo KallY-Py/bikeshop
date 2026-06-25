@@ -10,6 +10,8 @@ type User struct {
 	Email        string    `json:"email"`
 	PhoneNumber  *string   `json:"phone_number,omitempty"`
 	ProfileImage *string   `json:"profile_image,omitempty"`
+	Bio          *string   `json:"bio,omitempty"`        
+    Location     *string   `json:"location,omitempty"`
 	PasswordHash string    `json:"-"`
 	Role         string    `json:"role"`
 	Status       string    `json:"status"`
@@ -27,12 +29,15 @@ type UserRegister struct {
 }
 
 type UserUpdate struct {
-	FirstName   string `json:"first_name"`
-	LastName    string `json:"last_name"`
-	Username    string `json:"username"`
-	Email       string `json:"email"`
-	PhoneNumber string `json:"phone_number"`
-	Password    string `json:"password"`
+    FirstName   string `json:"first_name"`
+    LastName    string `json:"last_name"`
+    Username    string `json:"username"`
+    Email       string `json:"email"`
+    PhoneNumber string `json:"phone_number"`
+    Password    string `json:"password,omitempty"`
+    Bio         string `json:"bio,omitempty"`
+    Location    string `json:"location,omitempty"`
+    ProfileImage string `json:"profile_image,omitempty"`
 }
 
 type UserLogin struct {

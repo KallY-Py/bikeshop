@@ -139,75 +139,155 @@ func (h *UserHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// UpdateProfile updates the current user's profile (protected route)
+// UpdateUserByID updates a user by ID (for direct API calls)
+func (h *UserHandler) UpdateUserByID(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("Content-Type", "application/json")
+
+    params := mux.Vars(r)
+    id, err := strconv.ParseInt(params["id"], 10, 64)
+    if err != nil {
+        utils.RespondWithError(w, http.StatusBadRequest, "Invalid user ID")
+        return
+    }
+
+    var input struct {
+        FirstName   string `json:"first_name"`
+        LastName    string `json:"last_name"`
+        Username    string `json:"username"`
+        Email       string `json:"email"`
+        PhoneNumber string `json:"phone_number"`
+        Bio         string `json:"bio"`
+        Location    string `json:"location"`
+        ProfileImage string `json:"profile_image"`
+    }
+
+    if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+        utils.RespondWithError(w, http.StatusBadRequest, "Invalid request body")
+        return
+    }
+
+    existingUser, err := h.repo.GetByID(id)
+    if err != nil {
+        utils.RespondWithError(w, http.StatusInternalServerError, "Database error")
+        return
+    }
+    if existingUser == nil {
+        utils.RespondWithError(w, http.StatusNotFound, "User not found")
+        return
+    }
+
+    // Update fields if provided
+    if input.FirstName != "" {
+        existingUser.FirstName = input.FirstName
+    }
+    if input.LastName != "" {
+        existingUser.LastName = input.LastName
+    }
+    if input.Username != "" {
+        existingUser.Username = input.Username
+    }
+    if input.Email != "" {
+        existingUser.Email = input.Email
+    }
+    if input.PhoneNumber != "" {
+        existingUser.PhoneNumber = &input.PhoneNumber
+    }
+    if input.Bio != "" {
+        existingUser.Bio = &input.Bio
+    }
+    if input.Location != "" {
+        existingUser.Location = &input.Location
+    }
+    if input.ProfileImage != "" {
+        existingUser.ProfileImage = &input.ProfileImage
+    }
+
+    err = h.repo.Update(existingUser)
+    if err != nil {
+        utils.RespondWithError(w, http.StatusInternalServerError, "Failed to update user: "+err.Error())
+        return
+    }
+
+    existingUser.PasswordHash = ""
+
+    utils.RespondWithJSON(w, http.StatusOK, map[string]interface{}{
+        "message": "User updated successfully",
+        "user":    existingUser,
+    })
+}
+
 func (h *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+    w.Header().Set("Content-Type", "application/json")
 
-	// Get user ID from context
-	userID, ok := r.Context().Value(utils.UserIDKey).(int)
-	if !ok {
-		utils.RespondWithError(w, http.StatusUnauthorized, "Unauthorized")
-		return
-	}
+    userID, ok := r.Context().Value(utils.UserIDKey).(int)
+    if !ok {
+        utils.RespondWithError(w, http.StatusUnauthorized, "Unauthorized")
+        return
+    }
 
-	var input models.UserUpdate
-	err := json.NewDecoder(r.Body).Decode(&input)
-	if err != nil {
-		utils.RespondWithError(w, http.StatusBadRequest, "Invalid request body")
-		return
-	}
+    var input models.UserUpdate
+    err := json.NewDecoder(r.Body).Decode(&input)
+    if err != nil {
+        utils.RespondWithError(w, http.StatusBadRequest, "Invalid request body")
+        return
+    }
 
-	// Check if user exists
-	existingUser, err := h.repo.GetByID(int64(userID))
-	if err != nil {
-		utils.RespondWithError(w, http.StatusInternalServerError, "Database error")
-		return
-	}
-	if existingUser == nil {
-		utils.RespondWithError(w, http.StatusNotFound, "User not found")
-		return
-	}
+    existingUser, err := h.repo.GetByID(int64(userID))
+    if err != nil {
+        utils.RespondWithError(w, http.StatusInternalServerError, "Database error")
+        return
+    }
+    if existingUser == nil {
+        utils.RespondWithError(w, http.StatusNotFound, "User not found")
+        return
+    }
 
-	// Update user fields
-	if input.FirstName != "" {
-		existingUser.FirstName = input.FirstName
-	}
-	if input.LastName != "" {
-		existingUser.LastName = input.LastName
-	}
-	if input.Username != "" {
-		existingUser.Username = input.Username
-	}
-	if input.Email != "" {
-		existingUser.Email = input.Email
-	}
-	if input.PhoneNumber != "" {
-		existingUser.PhoneNumber = &input.PhoneNumber
-	}
-	if input.Password != "" {
-		// Hash the new password
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
-		if err != nil {
-			utils.RespondWithError(w, http.StatusInternalServerError, "Failed to hash password")
-			return
-		}
-		existingUser.PasswordHash = string(hashedPassword)
-	}
+    // Update user fields
+    if input.FirstName != "" {
+        existingUser.FirstName = input.FirstName
+    }
+    if input.LastName != "" {
+        existingUser.LastName = input.LastName
+    }
+    if input.Username != "" {
+        existingUser.Username = input.Username
+    }
+    if input.Email != "" {
+        existingUser.Email = input.Email
+    }
+    if input.PhoneNumber != "" {
+        existingUser.PhoneNumber = &input.PhoneNumber
+    }
+    if input.Bio != "" {
+        existingUser.Bio = &input.Bio
+    }
+    if input.Location != "" {
+        existingUser.Location = &input.Location
+    }
+    if input.ProfileImage != "" {
+        existingUser.ProfileImage = &input.ProfileImage
+    }
+    if input.Password != "" {
+        hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
+        if err != nil {
+            utils.RespondWithError(w, http.StatusInternalServerError, "Failed to hash password")
+            return
+        }
+        existingUser.PasswordHash = string(hashedPassword)
+    }
 
-	// Update in database
-	err = h.repo.Update(existingUser)
-	if err != nil {
-		utils.RespondWithError(w, http.StatusInternalServerError, "Failed to update user")
-		return
-	}
+    err = h.repo.Update(existingUser)
+    if err != nil {
+        utils.RespondWithError(w, http.StatusInternalServerError, "Failed to update user: "+err.Error())
+        return
+    }
 
-	// Remove sensitive data
-	existingUser.PasswordHash = ""
+    existingUser.PasswordHash = ""
 
-	utils.RespondWithJSON(w, http.StatusOK, map[string]interface{}{
-		"message": "Profile updated successfully",
-		"user":    existingUser,
-	})
+    utils.RespondWithJSON(w, http.StatusOK, map[string]interface{}{
+        "message": "Profile updated successfully",
+        "user":    existingUser,
+    })
 }
 
 // GetCurrentUser returns the current authenticated user

@@ -165,45 +165,45 @@ export default {
       }
     },
     
-    async handleLogin() {
-      this.loading = true
-      this.error = null
-      
-      try {
-        const response = await axios.post('http://localhost:3000/api/auth/login', {
-          identifier: this.loginForm.identifier,
-          password: this.loginForm.password
-        })
+  async handleLogin() {
+    this.loading = true
+    this.error = null
+    
+    try {
+      const response = await axios.post('http://localhost:3000/api/auth/login', {
+        identifier: this.loginForm.identifier,
+        password: this.loginForm.password
+      })
 
-        console.log('Login successful:', response.data)
-        
-        // Store token and user data
-        localStorage.setItem('token', response.data.token)
-        localStorage.setItem('user', JSON.stringify(response.data.user))
-        
-        // Role-based redirection
-        const userRole = response.data.user.role
-        
-        if (userRole === 'admin') {
-          this.$router.push('/admin/dashboard')
-        } else {
-          // Default to user dashboard for 'user' role or any other role
-          this.$router.push('/user/dashboard')
-        }
-        
-      } catch (error) {
-        console.error('Login error:', error)
-        let errorMessage = 'Login failed. Please check your credentials.'
-        
-        if (error.response && error.response.data) {
-          errorMessage = error.response.data.message || error.response.data.error || errorMessage
-        }
-        
-        alert(errorMessage)
-      } finally {
-        this.loading = false
+      console.log('Login successful:', response.data)
+      
+      // Store auth data
+      localStorage.setItem('token', response.data.token)
+      localStorage.setItem('userId', response.data.user.id)
+      localStorage.setItem('user', JSON.stringify(response.data.user))
+      
+      // Redirect based on role - MATCH ROUTER NAMES
+      const userRole = response.data.user.role
+      
+      if (userRole === 'admin') {
+        this.$router.push({ name: 'admin-dashboard' })  // path: /admin
+      } else {
+        this.$router.push({ name: 'user-dashboard' })   // path: /dashboard
       }
-    },
+      
+    } catch (error) {
+      console.error('Login error:', error)
+      let errorMessage = 'Login failed. Please check your credentials.'
+      
+      if (error.response?.data) {
+        errorMessage = error.response.data.message || error.response.data.error || errorMessage
+      }
+      
+      alert(errorMessage)
+    } finally {
+      this.loading = false
+    }
+  },
 
     async checkConnection() {
       this.error = null
