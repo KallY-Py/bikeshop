@@ -8,34 +8,34 @@ import (
 	"vue-go-backend/config"
 	"vue-go-backend/handlers"
 	"vue-go-backend/middleware"
+	"vue-go-backend/repository"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 )
 
 func main() {
-	// Initialize database connection
 	config.ConnectDB()
 	defer config.DB.Close()
 
-	// Create router
 	r := mux.NewRouter()
 
-	// Initialize handlers
 	userHandler := handlers.NewUserHandler()
 	listingHandler := handlers.NewListingHandler()
 	categoryHandler := handlers.NewCategoryHandler()
 	authHandler := handlers.NewAuthHandler()
-	dashboardHandler := handlers.NewDashboardHandler()
 
-	// API Routes
+	// Keep both dashboard and report handlers
+	dashboardHandler := handlers.NewDashboardHandler()
+	reportHandler := handlers.NewReportHandler(repository.NewReportRepository(config.DB))
+
 	api := r.PathPrefix("/api").Subrouter()
 
 	// Auth routes (public)
 	api.HandleFunc("/auth/register", authHandler.Register).Methods("POST")
 	api.HandleFunc("/auth/login", authHandler.Login).Methods("POST")
 
-	// User routes
+	// Public user routes
 	api.HandleFunc("/users", userHandler.GetUsers).Methods("GET")
 	api.HandleFunc("/users/{id}", userHandler.GetUser).Methods("GET")
 	api.HandleFunc("/users", userHandler.CreateUser).Methods("POST")
@@ -46,16 +46,35 @@ func main() {
 	api.HandleFunc("/dashboard/{userId}/listings", dashboardHandler.GetUserListings).Methods("GET")
 	api.HandleFunc("/dashboard/{userId}/messages", dashboardHandler.GetUserMessages).Methods("GET")
 
-	// Protected routes example
+	// Protected routes
 	protected := api.PathPrefix("/protected").Subrouter()
 	protected.Use(middleware.AuthMiddleware)
 	protected.HandleFunc("/profile", userHandler.GetProfile).Methods("GET")
+	protected.HandleFunc("/profile", userHandler.UpdateProfile).Methods("PUT")
+	protected.HandleFunc("/me", userHandler.GetCurrentUser).Methods("GET")
+
+	// Admin-only routes
+	admin := api.PathPrefix("/admin").Subrouter()
+	admin.Use(middleware.AuthMiddleware)
+	admin.Use(middleware.AdminMiddleware)
+	admin.HandleFunc("/users", userHandler.GetUsers).Methods("GET")
+	admin.HandleFunc("/users/{id}", userHandler.GetUser).Methods("GET")
+	admin.HandleFunc("/users/{id}", userHandler.UpdateUser).Methods("PUT")
+	admin.HandleFunc("/users/{id}/status", userHandler.UpdateUserStatus).Methods("PATCH")
+	admin.HandleFunc("/users/{id}", userHandler.DeleteUser).Methods("DELETE")
+
+	// Report management routes
+	admin.HandleFunc("/reports", reportHandler.GetReports).Methods("GET")
+	admin.HandleFunc("/reports/{id}", reportHandler.UpdateReportStatus).Methods("PATCH")
+
+	// Listing status update route
+	admin.HandleFunc("/listings/{id}/status", listingHandler.UpdateListingStatus).Methods("PATCH")
 
 	// Listing routes
 	api.HandleFunc("/listings", listingHandler.GetListings).Methods("GET")
 	api.HandleFunc("/listings/{id}", listingHandler.GetListing).Methods("GET")
 	api.HandleFunc("/listings", listingHandler.CreateListing).Methods("POST")
-	api.HandleFunc("/listings/{id}", listingHandler.UpdateListing).Methods("PUT")    
+	api.HandleFunc("/listings/{id}", listingHandler.UpdateListing).Methods("PUT")
 	api.HandleFunc("/listings/{id}", listingHandler.DeleteListing).Methods("DELETE")
 
 	// Category routes
@@ -67,7 +86,6 @@ func main() {
 		w.Write([]byte(`{"status":"ok","message":"Bikeshop API is running"}`))
 	}).Methods("GET")
 
-	// CORS configuration - More permissive for development
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
@@ -78,9 +96,7 @@ func main() {
 
 	handler := c.Handler(r)
 
-	// Start server
 	port := ":3000"
 	fmt.Printf("🚀 Bikeshop API server running on http://localhost%s\n", port)
-
 	log.Fatal(http.ListenAndServe(port, handler))
 }
