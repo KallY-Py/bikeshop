@@ -62,17 +62,6 @@
           <span>{{ item.name }}</span>
         </router-link>
       </div>
-
-      <div class="px-4 mt-4 border-t border-outline-variant pt-4 space-y-1">
-        <router-link to="/settings" class="flex items-center gap-3 text-on-surface-variant hover:text-on-surface py-2 px-2 rounded-lg font-label-md text-label-md transition-colors hover:bg-surface-container-high">
-          <span class="material-symbols-outlined">settings</span>
-          <span>Settings</span>
-        </router-link>
-        <button @click="handleLogout" class="flex items-center gap-3 text-on-surface-variant hover:text-error py-2 px-2 rounded-lg font-label-md text-label-md transition-colors w-full text-left hover:bg-error/10">
-          <span class="material-symbols-outlined">logout</span>
-          <span>Logout</span>
-        </button>
-      </div>
     </nav>
 
     <!-- Main Content Area -->
