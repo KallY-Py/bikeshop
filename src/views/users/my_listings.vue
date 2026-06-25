@@ -39,11 +39,15 @@
 
     <!-- Loading -->
     <div v-if="loading" class="flex justify-center items-center h-64">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div class="text-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+        <p class="text-on-surface-variant">Loading your listings...</p>
+      </div>
     </div>
 
     <!-- Error -->
     <div v-else-if="error" class="bg-error/10 border border-error/20 rounded-xl p-8 text-center">
+      <span class="material-symbols-outlined text-error text-4xl mb-4">error</span>
       <p class="text-error font-label-md mb-4">{{ error }}</p>
       <button @click="loadListings" class="bg-surface-variant hover:bg-surface-bright text-on-surface px-6 py-2 rounded-lg">Retry</button>
     </div>
@@ -58,21 +62,21 @@
       </div>
 
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
-        <ListingCard v-for="listing in filteredListings" :key="listing.id" :listing="listing" @edit="editListing" @delete="confirmDelete" @view="viewListing" />
+        <ListingCard v-for="listing in filteredListings" :key="listing.id" :listing="listing" @edit="editListing" @delete="confirmDelete" />
       </div>
     </div>
 
     <!-- Add/Edit Modal -->
     <ListingModal v-if="showAddModal || showEditModal" :listing="editingListing" :categories="categories" :saving="saving" @close="closeModal" @save="saveListing" />
 
-    <!-- Delete Modal -->
+    <!-- Delete Confirmation Modal -->
     <div v-if="showDeleteModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div class="bg-surface-container-high border border-outline-variant rounded-xl p-6 max-w-md w-full">
-        <h3 class="font-headline-md text-on-surface mb-4">Delete Listing</h3>
+        <h3 class="font-headline-md text-headline-md text-on-surface mb-4">Delete Listing</h3>
         <p class="text-on-surface-variant mb-6">Are you sure you want to delete "{{ deletingListing?.title }}"?</p>
         <div class="flex gap-3 justify-end">
-          <button @click="showDeleteModal = false" class="px-4 py-2 rounded-lg bg-surface-variant text-on-surface">Cancel</button>
-          <button @click="deleteListing" class="px-4 py-2 rounded-lg bg-error text-on-error">Delete</button>
+          <button @click="showDeleteModal = false" class="px-4 py-2 rounded-lg bg-surface-variant text-on-surface hover:bg-surface-bright transition-colors">Cancel</button>
+          <button @click="deleteListing" class="px-4 py-2 rounded-lg bg-error text-on-error hover:bg-error-container transition-colors">Delete</button>
         </div>
       </div>
     </div>
@@ -95,6 +99,8 @@ import UserNav from '@/components/User_Nav.vue'
 import ListingCard from '@/components/user/ListingCard.vue'
 import ListingModal from '@/components/user/ListingModal.vue'
 import axios from 'axios'
+
+const API_URL = 'http://localhost:3000/api'
 
 const loading = ref(true)
 const error = ref(null)
@@ -127,65 +133,106 @@ const filteredListings = computed(() => {
   return filtered
 })
 
-const loadListings = async () => {
-  try {
-    loading.value = true; error.value = null
-    const userId = localStorage.getItem('userId') || '1'
-    const response = await userDashboardService.getListings(userId)
-    listings.value = Array.isArray(response.data) ? response.data : []
-  } catch (err) {
-    error.value = 'Failed to load listings.'
-  } finally { loading.value = false }
-}
+  const loadListings = async () => {
+    try {
+      loading.value = true
+      error.value = null
+      const userId = localStorage.getItem('userId') || '4'
+      
+      const response = await userDashboardService.getListings(userId)
+      
+      // Axios puts the JSON response in response.data
+      // The API returns a JSON array directly
+      listings.value = response.data
+      
+      console.log('Listings loaded:', listings.value.length, listings.value)
+      
+    } catch (err) {
+      console.error('Failed to load listings:', err)
+      error.value = 'Failed to load listings.'
+    } finally { 
+      loading.value = false 
+    }
+  }
 
 const loadCategories = async () => {
-  try { const r = await categoryService.getAll(); categories.value = r.data || [] } catch (err) { console.error(err) }
+  try { 
+    const r = await categoryService.getAll()
+    categories.value = r.data || [] 
+  } catch (err) { 
+    console.error('Failed to load categories:', err)
+  }
 }
 
-const editListing = (l) => { editingListing.value = { ...l }; showEditModal.value = true }
-const confirmDelete = (l) => { deletingListing.value = l; showDeleteModal.value = true }
+const editListing = (listing) => { 
+  editingListing.value = { ...listing }
+  showEditModal.value = true 
+}
+
+const confirmDelete = (listing) => { 
+  deletingListing.value = listing
+  showDeleteModal.value = true 
+}
 
 const deleteListing = async () => {
   try {
     const id = deletingListing.value.id
-    await axios.delete(`http://localhost:3000/api/listings/${id}`)
+    await axios.delete(`${API_URL}/listings/${id}`)
     listings.value = listings.value.filter(l => l.id !== id)
     showDeleteModal.value = false
-  } catch (err) { console.error(err) }
+    deletingListing.value = null
+  } catch (err) {
+    console.error('Failed to delete listing:', err)
+    alert('Failed to delete listing. Please try again.')
+  }
 }
 
-const closeModal = () => { showAddModal.value = false; showEditModal.value = false; editingListing.value = null }
+const closeModal = () => { 
+  showAddModal.value = false
+  showEditModal.value = false
+  editingListing.value = null
+}
 
-  const saveListing = async (listingData) => {
-    try {
-      saving.value = true
-      const userId = localStorage.getItem('userId') || '1'
+const saveListing = async (listingData) => {
+  try {
+    saving.value = true
+    const userId = localStorage.getItem('userId') || '1'
 
-      const payload = {
-        user_id: parseInt(userId),
-        category_id: parseInt(listingData.category_id) || 1,
-        title: listingData.title,
-        description: listingData.description || '',
-        price: parseFloat(listingData.price) || 0,
-        condition_type: listingData.condition_type || 'used',
-        location: listingData.location || '',
-        image_url: listingData.image_url || ''  // ADD THIS
-      }
+    const payload = {
+      user_id: parseInt(userId),
+      category_id: parseInt(listingData.category_id) || 1,
+      title: listingData.title,
+      description: listingData.description || '',
+      price: parseFloat(listingData.price) || 0,
+      condition_type: listingData.condition_type || 'used',
+      location: listingData.location || '',
+      image_url: listingData.image_url || ''
+    }
 
-      if (editingListing.value?.id) {
-        await axios.put(`http://localhost:3000/api/listings/${editingListing.value.id}`, payload)
-      } else {
-        await axios.post('http://localhost:3000/api/listings', payload)
-      }
-      closeModal()
-      await loadListings()
-    } catch (err) {
-      console.error('Failed to save:', err)
-      alert('Failed to save listing.')
-    } finally { saving.value = false }
+    console.log('Saving listing:', payload)
+
+    if (editingListing.value?.id) {
+      await axios.put(`${API_URL}/listings/${editingListing.value.id}`, payload)
+      console.log('Listing updated')
+    } else {
+      const response = await axios.post(`${API_URL}/listings`, payload)
+      console.log('Listing created:', response.data)
+    }
+    
+    closeModal()
+    await loadListings() // Refresh the list
+    
+  } catch (err) {
+    console.error('Failed to save listing:', err)
+    const errorMsg = err.response?.data?.error || 'Failed to save listing. Please try again.'
+    alert(errorMsg)
+  } finally { 
+    saving.value = false 
   }
+}
 
-const viewListing = (l) => console.log('View:', l.id)
-
-onMounted(() => { loadListings(); loadCategories() })
+onMounted(() => { 
+  loadListings()
+  loadCategories() 
+})
 </script>

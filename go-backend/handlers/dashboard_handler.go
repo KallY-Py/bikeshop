@@ -68,22 +68,21 @@ func (h *DashboardHandler) GetUserDashboard(w http.ResponseWriter, r *http.Reque
         params := mux.Vars(r)
         userID, _ := strconv.ParseInt(params["userId"], 10, 64)
         
+        // Use subquery for image to avoid GROUP BY issues
         rows, err := config.DB.Query(`
             SELECT l.id, l.title, COALESCE(l.description, '') as description, 
                 l.price, l.status, l.condition_type, 
                 COALESCE(l.location, '') as location, COALESCE(l.views, 0) as views, 
                 l.created_at, l.updated_at,
                 COALESCE(c.name, '') as category_name,
-                COALESCE(li.image_url, '') as image_url
+                COALESCE((SELECT li.image_url FROM listing_images li WHERE li.listing_id = l.id LIMIT 1), '') as image_url
             FROM listings l
             LEFT JOIN categories c ON l.category_id = c.id
-            LEFT JOIN listing_images li ON l.id = li.listing_id
             WHERE l.user_id = ?
-            GROUP BY l.id
             ORDER BY l.created_at DESC
         `, userID)
         if err != nil {
-            http.Error(w, err.Error(), http.StatusInternalServerError)
+            http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusInternalServerError)
             return
         }
         defer rows.Close()
@@ -96,10 +95,12 @@ func (h *DashboardHandler) GetUserDashboard(w http.ResponseWriter, r *http.Reque
             var views int
             var createdAt, updatedAt string
             
-            // THIS IS WHERE THE SCAN GOES
-            rows.Scan(&id, &title, &description, &price, &status,
+            err := rows.Scan(&id, &title, &description, &price, &status,
                 &conditionType, &location, &views, &createdAt, &updatedAt,
                 &categoryName, &imageUrl)
+            if err != nil {
+                continue
+            }
             
             listings = append(listings, map[string]interface{}{
                 "id":             id,
@@ -111,7 +112,7 @@ func (h *DashboardHandler) GetUserDashboard(w http.ResponseWriter, r *http.Reque
                 "location":       location,
                 "views":          views,
                 "category":       categoryName,
-                "image_url":      imageUrl,   // ADD THIS
+                "image_url":      imageUrl,
                 "created_at":     createdAt,
                 "updated_at":     updatedAt,
             })

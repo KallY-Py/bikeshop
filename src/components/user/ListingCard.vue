@@ -1,7 +1,7 @@
 <template>
   <div class="bg-surface-container-low border border-outline-variant rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all group">
     <div class="relative h-48 bg-surface overflow-hidden">
-      <img :src="listing.image || 'https://via.placeholder.com/400x300'" :alt="listing.title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+      <img :src="listing.image || 'https://via.placeholder.com/400x300'" :alt="listing.title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" @error="onImageError"/>
       <div class="absolute top-3 right-3 flex gap-2">
         <span class="px-2 py-1 rounded-full text-xs font-semibold uppercase tracking-wider" :class="statusClass">{{ listing.status }}</span>
       </div>
@@ -55,6 +55,9 @@ export default {
     formatDate(d) {
       if (!d) return ''
       return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    },
+    onImageError(e) {
+      e.target.src = 'https://via.placeholder.com/400x300?text=No+Image'
     }
   }
 }
